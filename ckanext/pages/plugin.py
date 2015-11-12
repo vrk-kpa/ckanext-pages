@@ -1,14 +1,17 @@
 import logging
 from pylons import config
-import ckan.plugins.toolkit as toolkit
-ignore_missing = toolkit.get_validator('ignore_missing')
 
+import pylons
 import ckan.plugins as p
 import ckan.lib.helpers as h
 import actions
 import auth
 
+import ckan.plugins.toolkit as toolkit
+ignore_missing = toolkit.get_validator('ignore_missing')
+
 log = logging.getLogger(__name__)
+
 
 def build_pages_nav_main(*args):
 
@@ -33,11 +36,17 @@ def build_pages_nav_main(*args):
 
     page_name = ''
 
-    if (p.toolkit.c.action in ('pages_show', 'blog_show')
-       and p.toolkit.c.controller == 'ckanext.pages.controller:PagesController'):
+    if (p.toolkit.c.action in ('pages_show', 'blog_show') and
+            p.toolkit.c.controller == 'ckanext.pages.controller:PagesController'):
         page_name = p.toolkit.c.environ['routes.url'].current().split('/')[-1]
 
+    desired_lang_code = pylons.request.environ['CKAN_LANG']
+    acceptable_lang_codes = [desired_lang_code, desired_lang_code.split('_', 1)[0]]
+
     for page in pages_list:
+        if page.get('lang') and page.get('lang') not in acceptable_lang_codes:
+            continue
+
         if page['page_type'] == 'blog':
             link = h.link_to(page.get('title'),
                              h.url_for('/blog/' + str(page['name'])))
@@ -142,7 +151,6 @@ class PagesPlugin(p.SingletonPlugin):
             map.connect('group_pages', '/group/pages/{id}{page:/.*|}',
                         action='group_show', ckan_icon='file', controller=controller, highlight_actions='group_edit group_show')
 
-
         map.connect('pages_delete', '/pages_delete{page:/.*|}',
                     action='pages_delete', ckan_icon='delete', controller=controller)
         map.connect('pages_edit', '/pages_edit{page:/.*|}',
@@ -164,7 +172,6 @@ class PagesPlugin(p.SingletonPlugin):
                     action='blog_show', ckan_icon='file', controller=controller, highlight_actions='blog_edit blog_index blog_show')
         return map
 
-
     def get_actions(self):
         actions_dict = {
             'ckanext_pages_show': actions.pages_show,
@@ -174,7 +181,7 @@ class PagesPlugin(p.SingletonPlugin):
             'ckanext_pages_upload': actions.pages_upload,
         }
         if self.organization_pages:
-            org_actions={
+            org_actions = {
                 'ckanext_org_pages_show': actions.org_pages_show,
                 'ckanext_org_pages_update': actions.org_pages_update,
                 'ckanext_org_pages_delete': actions.org_pages_delete,
@@ -182,7 +189,7 @@ class PagesPlugin(p.SingletonPlugin):
             }
             actions_dict.update(org_actions)
         if self.group_pages:
-            group_actions={
+            group_actions = {
                 'ckanext_group_pages_show': actions.group_pages_show,
                 'ckanext_group_pages_update': actions.group_pages_update,
                 'ckanext_group_pages_delete': actions.group_pages_delete,
@@ -206,7 +213,8 @@ class PagesPlugin(p.SingletonPlugin):
             'ckanext_group_pages_update': auth.group_pages_update,
             'ckanext_group_pages_delete': auth.group_pages_delete,
             'ckanext_group_pages_list': auth.group_pages_list,
-       }
+            }
+
 
 class TextBoxView(p.SingletonPlugin):
 

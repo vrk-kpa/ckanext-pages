@@ -11,6 +11,7 @@ from HTMLParser import HTMLParser
 
 
 import db
+
 def page_name_validator(key, data, errors, context):
     session = context['session']
     page = context.get('page')
@@ -44,6 +45,7 @@ schema = {
     'title': [p.toolkit.get_validator('not_empty'), unicode],
     'name': [p.toolkit.get_validator('not_empty'), unicode,
              p.toolkit.get_validator('name_validator'), page_name_validator],
+    'lang': [p.toolkit.get_validator('ignore_missing'), unicode],
     'content': [p.toolkit.get_validator('ignore_missing'), unicode],
     'page_type': [p.toolkit.get_validator('ignore_missing'), unicode],
   #  'lang': [p.toolkit.get_validator('not_empty'), unicode],
@@ -115,6 +117,7 @@ def _pages_list(context, data_dict):
                   'publish_date': pg.publish_date.isoformat() if pg.publish_date else None,
                   'group_id': pg.group_id,
                   'page_type': pg.page_type,
+                  'lang': pg.lang
                  }
         if img:
             pg_row['image'] = img
@@ -156,7 +159,7 @@ def _pages_update(context, data_dict):
         out.group_id = org_id
         out.name = page
     items = ['title', 'content', 'name', 'private',
-             'order', 'page_type', 'publish_date']
+             'order', 'page_type', 'publish_date', 'lang']
     for item in items:
         setattr(out, item, data.get(item,'page' if item =='page_type' else None)) #backward compatible with older version where page_type does not exist
 
