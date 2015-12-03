@@ -68,7 +68,15 @@ def _pages_show(context, data_dict):
         db.init_db(context['model'])
     org_id = data_dict.get('org_id')
     page = data_dict.get('page')
-    out = db.Page.get(group_id=org_id, name=page)
+    order = data_dict.get('order')
+    lang = data_dict.get('lang')
+
+    out = None
+    if page or org_id:
+        out = db.Page.get(group_id=org_id, name=page)
+    elif lang and order:
+        out = db.Page.get(order=order, lang=lang)
+
     if out:
         out = db.table_dictize(out, context)
     return out
