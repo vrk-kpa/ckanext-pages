@@ -269,6 +269,10 @@ class PagesController(p.toolkit.BaseController):
                        'page': page}
         )
 
+        # If the page does not exist
+        if _page is None:
+            return self._pages_list_pages(page_type)
+
         # Attempt to make sure page language matches requested language
         desired_lang_code = pylons.request.environ['CKAN_LANG']
         acceptable_lang_codes = [desired_lang_code, desired_lang_code.split('_', 1)[0]]
@@ -284,8 +288,6 @@ class PagesController(p.toolkit.BaseController):
                     return p.toolkit.redirect_to('pages_show', page = "/%s" % str(page.get('name')))
 
 
-        if _page is None:
-            return self._pages_list_pages(page_type)
         p.toolkit.c.page = _page
         self._inject_views_into_page(_page)
 
