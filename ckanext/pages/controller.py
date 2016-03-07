@@ -3,6 +3,7 @@ import ckan.lib.helpers as helpers
 from pylons import config
 import pylons
 import logging
+import ckan.lib.csrf_token as csrf_token
 
 _ = p.toolkit._
 log = logging.getLogger(__name__)
@@ -324,6 +325,7 @@ class PagesController(p.toolkit.BaseController):
 
         try:
             if p.toolkit.request.method == 'POST':
+                csrf_token.validate(p.toolkit.request.POST.get('csrf-token', ''))
                 p.toolkit.get_action('ckanext_pages_delete')({}, {'page': page})
                 p.toolkit.redirect_to('%s_index' % page_type)
             else:
@@ -332,6 +334,9 @@ class PagesController(p.toolkit.BaseController):
             p.toolkit.abort(401, _('Unauthorized to delete page'))
         except p.toolkit.ObjectNotFound:
             p.toolkit.abort(404, _('Group not found'))
+        except csrf_token.CsrfTokenValidationError:
+            helpers.flash_error(_('Security token error, please try again'))
+            p.toolkit.redirect_to(controller=self.controller, action='%s_edit' % page_type, page='/' + page)
         return p.toolkit.render('ckanext_pages/confirm_delete.html', {'page': page})
 
 
@@ -358,6 +363,7 @@ class PagesController(p.toolkit.BaseController):
             _page['page_type'] = 'page' if page_type == 'pages' else page_type
 
             try:
+                csrf_token.validate(p.toolkit.request.POST.get('csrf-token', ''))
                 junk = p.toolkit.get_action('ckanext_pages_update')(
                     data_dict=_page
                 )
@@ -366,6 +372,14 @@ class PagesController(p.toolkit.BaseController):
                 error_summary = e.error_summary
                 return self.pages_edit('/' + page, data,
                                        errors, error_summary, page_type=page_type)
+            except csrf_token.CsrfTokenValidationError:
+                helpers.flash_error(_('Security token error, please try again'))
+                form_snippet = config.get('ckanext.pages.form', 'ckanext_pages/base_form.html')
+                vars = {'data': data, 'errors': errors,
+                    'error_summary': error_summary, 'page': page,
+                    'form_snippet': form_snippet}
+                return p.toolkit.render('ckanext_pages/%s_edit.html' % page_type,
+                                        extra_vars=vars)
             p.toolkit.redirect_to(p.toolkit.url_for('%s_show' % page_type,
                                                     page='/' + _page['name']))
 
