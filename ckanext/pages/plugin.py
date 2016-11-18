@@ -48,10 +48,10 @@ def build_pages_nav_main(*args):
             continue
 
         if page['page_type'] == 'blog':
-            link = h.link_to(page.get('title'),
+            link = h.tags.link_to(page.get('title'),
                              h.url_for('/blog/' + str(page['name'])))
         else:
-            link = h.link_to(page.get('title'),
+            link = h.tags.link_to(page.get('title'),
                              h.url_for('/pages/' + str(page['name'])))
 
         if page['name'] == page_name:
