@@ -53,7 +53,7 @@ def build_pages_nav_main(*args):
        and toolkit.c.controller == 'ckanext.pages.controller:PagesController'):
         page_name = toolkit.c.environ['routes.url'].current().split('/')[-1]
 
-    desired_lang_code = pylons.request.environ['CKAN_LANG']
+    desired_lang_code = h.lang()
     acceptable_lang_codes = [desired_lang_code, desired_lang_code.split('_', 1)[0]]
 
     for page in pages_list:
