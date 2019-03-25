@@ -69,7 +69,17 @@ ckanext.pages.editor = ckeditor
 ```
 This enables either the [medium](https://jakiestfu.github.io/Medium.js/docs/) or [ckeditor](http://ckeditor.com/)
 
-Dependencies
-------------
+## Dependencies
 
 * lxml
+
+
+## License
+
+Released under the GNU Affero General Public License (AGPL) v3.0. See the file `LICENSE` for details.
+
+
+## History
+
+See the file [CHANGELOG.md](CHANGELOG.md).
+

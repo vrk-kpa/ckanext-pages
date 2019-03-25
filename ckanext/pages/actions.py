@@ -3,11 +3,14 @@ import json
 
 import ckan.plugins as p
 import ckan.lib.navl.dictization_functions as df
-import ckan.authz as authz
 import ckan.lib.uploader as uploader
 import ckan.lib.helpers as h
 from ckan.plugins import toolkit as tk
 from HTMLParser import HTMLParser
+try:
+    import ckan.authz as authz
+except ImportError:
+    import ckan.new_authz as authz
 
 
 import db
@@ -192,7 +195,11 @@ def pages_upload(context, data_dict):
     except p.toolkit.NotAuthorized:
         p.toolkit.abort(401, p.toolkit._('Not authorized to see this page'))
 
-    upload = uploader.Upload('page_images')
+    if p.toolkit.check_ckan_version(min_version='2.5'):
+        upload = uploader.get_uploader('page_images')
+    else:
+        upload = uploader.Upload('page_images')
+
     upload.update_data_dict(data_dict, 'image_url',
                             'upload', 'clear_upload')
     upload.upload()

@@ -1,5 +1,9 @@
 import ckan.plugins as p
-import ckan.authz as authz
+
+try:
+    import ckan.authz as authz
+except ImportError:
+    import ckan.new_authz as authz
 
 import db
 
