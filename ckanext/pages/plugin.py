@@ -58,13 +58,15 @@ def build_pages_nav_main(*args):
 
     for page in pages_list:
 
-        if page.get('lang') and page.get('lang') not in acceptable_lang_codes:
+        lang = page.get('lang')
+
+        if lang and lang not in acceptable_lang_codes:
             continue
 
         type_ = 'blog' if page['page_type'] == 'blog' else 'pages'
         name = urllib.quote(page['name'].encode('utf-8')).decode('utf-8')
         title = cgi.escape(page['title'])
-        link = h.literal(u'<a href="/{}/{}">{}</a>'.format(type_, name, title))
+        link = h.literal(u'<a href="/{}/{}/{}">{}</a>'.format(lang, type_, name, title))
 
         if page['name'] == page_name:
             li = h.literal('<li class="active">') + link + h.literal('</li>')
